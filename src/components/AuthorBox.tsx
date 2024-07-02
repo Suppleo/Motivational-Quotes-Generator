@@ -5,7 +5,7 @@ interface Props {
 const AuthorBox = ({ children }: Props) => {
   return (
     <div className="lead text-center text-secondary mt-5 fw-bold">
-      {children}
+      - {children}
     </div>
   );
 };
