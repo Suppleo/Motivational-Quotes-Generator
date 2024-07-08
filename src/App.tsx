@@ -6,45 +6,71 @@ import SubHeading from "./components/SubHeading";
 import GenerateButton from "./components/GenerateButton";
 import QuoteBox from "./components/QuoteBox";
 import AuthorBox from "./components/AuthorBox";
+import GrayButton from "./components/GrayButton";
+import SaveList from "./components/SaveList";
+import SaveListButton from "./components/SaveListButton";
+import FavoriteIcon from "./components/FavoriteIcon";
+import "./App.css";
 
-const QuoteAPIURL = "https://api.quotable.io/quotes/random";
+const QuoteAPIURL =
+  "https://api.quotable.io/quotes/random?tags=motivational|change|character|competition|courage|creativity|education|ethics|faith|family|famous-quotes|friendship|future|generosity|gratitude|happiness|health|honor|inspirational|leadership|life|love|opportunity|perseverance|power-quotes|self|self-help|success|time|tolerance|wellness|wisdom|work";
 
 function App() {
-  const [count, setCount] = useState(0);
   const [alertVisible, setAlertVisible] = useState(false);
-  const [quoteVisible, setQuoteVisible] = useState(false);
+  const [quoteIndex, setQuoteIndex] = useState(-1);
   const [quote, setQuote] = useState("");
   const [author, setAuthor] = useState("");
-  const [isLoading, setLoading] = useState(true);
+  const [isButtonClicked, setIsButtonClicked] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [quoteList, setQuoteList] = useState<string[]>([]);
+  const [authorList, setAuthorList] = useState<string[]>([]);
 
+  // Fetching data from Quote API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const response = await fetch(QuoteAPIURL);
         const json = await response.json();
         const fetchedQuote = json[0].content;
         const fetchedAuthor = json[0].author;
         setQuote(fetchedQuote);
         setAuthor(fetchedAuthor);
-        setLoading(false); // Set loading state to false after data is fetched
+        setIsButtonClicked(false);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
-    if (quoteVisible) {
+    if (quoteIndex >= 0) {
       fetchData();
     }
-  }, [quoteVisible]);
+  }, [quoteIndex]);
+
+  // Updating the Save List
+  useEffect(() => {
+    if (!isButtonClicked) {
+      if (liked) {
+        setQuoteList([...quoteList, quote]);
+        setAuthorList([...authorList, author]);
+      } else {
+        setQuoteList(quoteList.filter((q) => q !== quote));
+        setAuthorList(authorList.filter((a) => a !== author));
+      }
+    }
+  }, [liked, isButtonClicked]);
 
   const handleGayClick = () => {
-    setCount(count + 1);
     setAlertVisible(true);
   };
 
   const handleGenerateClick = () => {
-    setQuoteVisible(!quoteVisible);
+    setQuoteIndex(quoteIndex + 1);
+    setIsButtonClicked(true);
+    setLiked(false);
+  };
+
+  const handleHeartClick = () => {
+    setLiked(!liked);
   };
 
   return (
@@ -53,21 +79,33 @@ function App() {
       <div className="text-center">
         <Heading>Motivational Quotes Generator</Heading>
         <SubHeading>Made by: Suppleo</SubHeading>
-        <GayButton count={count} onClick={handleGayClick} />
-        <GenerateButton onClick={handleGenerateClick} />
-        {quoteVisible && (
+        <GayButton onClick={handleGayClick} />
+
+        {isButtonClicked ? (
+          <GrayButton>Generating...</GrayButton>
+        ) : (
+          <GenerateButton onClick={handleGenerateClick} />
+        )}
+
+        <SaveListButton>Favorite Quotes</SaveListButton>
+      </div>
+
+      <div className="text-center">
+        {quoteIndex >= 0 && (
+          <FavoriteIcon liked={liked} onClick={handleHeartClick} />
+        )}
+      </div>
+
+      <div className="text-center">
+        {quoteIndex >= 0 && (
           <div>
-            {isLoading ? (
-              <p>Loading...</p>
-            ) : (
-              <>
-                <QuoteBox>{quote}</QuoteBox>
-                <AuthorBox>{author}</AuthorBox>
-              </>
-            )}
+            <QuoteBox>{quote}</QuoteBox>
+            <AuthorBox>{author}</AuthorBox>
           </div>
         )}
       </div>
+
+      <SaveList quotes={quoteList} authors={authorList} />
     </>
   );
 }
