@@ -46,7 +46,7 @@ function App() {
     }
   }, [quoteIndex]);
 
-  // Updating the Save List
+  // Updating the Save List on Favorite icon
   useEffect(() => {
     if (!isButtonClicked) {
       if (liked) {
@@ -71,6 +71,21 @@ function App() {
 
   const handleHeartClick = () => {
     setLiked(!liked);
+  };
+
+  const handleTrashModalDelete = (quoteRemove: string) => {
+    const deleteIndex = quoteList.indexOf(quoteRemove);
+    if (deleteIndex !== -1) {
+      const updatedQuotes = [...quoteList];
+      const updatedAuthors = [...authorList];
+      updatedQuotes.splice(deleteIndex, 1);
+      updatedAuthors.splice(deleteIndex, 1);
+      setQuoteList(updatedQuotes);
+      setAuthorList(updatedAuthors);
+    }
+    if (deleteIndex === quoteList.length - 1) {
+      setLiked(false);
+    }
   };
 
   return (
@@ -105,7 +120,13 @@ function App() {
         )}
       </div>
 
-      <SaveList quotes={quoteList} authors={authorList} />
+      <SaveList
+        quotes={quoteList}
+        authors={authorList}
+        onRemoveButtonClick={(quoteRemove) =>
+          handleTrashModalDelete(quoteRemove)
+        }
+      />
     </>
   );
 }
