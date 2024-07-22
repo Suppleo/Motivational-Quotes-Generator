@@ -1,16 +1,16 @@
-import Alert from "./components/Alert";
-import GayButton from "./components/GayButton";
+import Alert from "../components/Alert";
+import GayButton from "../components/GayButton";
 import { useEffect, useState } from "react";
-import Heading from "./components/Heading";
-import SubHeading from "./components/SubHeading";
-import GenerateButton from "./components/GenerateButton";
-import QuoteBox from "./components/QuoteBox";
-import AuthorBox from "./components/AuthorBox";
-import GrayButton from "./components/GrayButton";
-import SaveList from "./components/SaveList";
-import SaveListButton from "./components/SaveListButton";
-import FavoriteIcon from "./components/FavoriteIcon";
-import "./App.css";
+import Heading from "../components/Heading";
+import SubHeading from "../components/SubHeading";
+import GenerateButton from "../components/GenerateButton";
+import QuoteBox from "../components/QuoteBox";
+import AuthorBox from "../components/AuthorBox";
+import GrayButton from "../components/GrayButton";
+import SaveList from "../components/SaveList";
+import SaveListButton from "../components/SaveListButton";
+import FavoriteIcon from "../components/FavoriteIcon";
+import LoginButton from "../components/LoginButton";
 
 const QuoteAPIURL =
   "https://api.quotable.io/quotes/random?tags=motivational|change|character|competition|courage|creativity|education|ethics|faith|family|famous-quotes|friendship|future|generosity|gratitude|happiness|health|honor|inspirational|leadership|life|love|opportunity|perseverance|power-quotes|self|self-help|success|time|tolerance|wellness|wisdom|work";
@@ -103,6 +103,7 @@ function App() {
         )}
 
         <SaveListButton>Favorite Quotes</SaveListButton>
+        <LoginButton />
       </div>
 
       <div className="text-center">
