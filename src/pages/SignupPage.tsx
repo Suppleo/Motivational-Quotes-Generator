@@ -1,18 +1,19 @@
 import { Link, useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
+import { setDoc, doc } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
 import { useState } from "react";
 
 function SignUpPage() {
   const navigate = useNavigate();
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [alertVisible, setAlertVisible] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [isSignedUp, setIsSignedUp] = useState(false);
-  const [signedUpUserName, setSignedUpUserName] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
 
   const handleCloseError = () => {
     setAlertVisible(false);
@@ -26,17 +27,22 @@ function SignUpPage() {
     }
 
     try {
-      const user = await createUserWithEmailAndPassword(
+      const userCredential = await createUserWithEmailAndPassword(
         auth,
         registerEmail,
         registerPassword
       );
+      const user = userCredential.user;
+
+      // Save additional user information to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        fullName,
+        username,
+        email: registerEmail,
+      });
+
       console.log(user);
-      setSignedUpUserName(user.user?.email || "");
       setIsSignedUp(true);
-      setSuccessMessage(
-        `You have successfully signed up as ${signedUpUserName}!`
-      );
     } catch (error: Error | any) {
       console.error(error);
       if (error.code === "auth/weak-password") {
@@ -61,12 +67,10 @@ function SignUpPage() {
     <>
       {alertVisible && (
         <div
-          className={`alert alert-${
-            errorMessage ? "danger" : "success"
-          } alert-dismissible fade show`}
+          className={`alert alert-danger alert-dismissible fade show`}
           role="alert"
         >
-          {errorMessage || successMessage}
+          {errorMessage}
           <button
             type="button"
             className="btn-close"
@@ -103,6 +107,7 @@ function SignUpPage() {
                     className="form-control"
                     id="fullNameInput"
                     placeholder="e.g. Gumball Waterson"
+                    onChange={(e) => setFullName(e.target.value)}
                   />
                 </div>
                 <div className="mb-3">
@@ -114,7 +119,7 @@ function SignUpPage() {
                     className="form-control"
                     id="usernameInput"
                     placeholder="e.g. gumball_iz_kool123"
-                    onChange={(e) => setSignedUpUserName(e.target.value)}
+                    onChange={(e) => setUsername(e.target.value)}
                   />
                 </div>
                 <div className="mb-3">

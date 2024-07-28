@@ -1,16 +1,14 @@
 interface Props {
   onClose: () => void;
-  type: string;
-  message: React.ReactNode;
 }
 
-const Alert = ({ onClose, type, message }: Props) => {
+const Alert = ({ onClose }: Props) => {
   return (
     <div
-      className={`alert alert-${type} alert-dismissible fade show`}
+      className="alert alert-danger alert-dismissible fade show"
       role="alert"
     >
-      {message}
+      <strong>FUCK YOU!</strong> You are gay.
       <button
         type="button"
         className="btn-close"

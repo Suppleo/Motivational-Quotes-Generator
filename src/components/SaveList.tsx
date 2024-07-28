@@ -4,9 +4,15 @@ interface Props {
   quotes: string[];
   authors: string[];
   onRemoveButtonClick: (quote: string) => void;
+  isLoggedIn: boolean;
 }
 
-const SaveList = ({ quotes, authors, onRemoveButtonClick }: Props) => {
+const SaveList = ({
+  quotes,
+  authors,
+  onRemoveButtonClick,
+  isLoggedIn,
+}: Props) => {
   const quoteList = quotes.map((quote, index) => (
     <div className="card my-2" key={quote}>
       <div className="card-body text-center">{quote}</div>
@@ -127,14 +133,16 @@ const SaveList = ({ quotes, authors, onRemoveButtonClick }: Props) => {
           </svg>{" "}
           to save your favorite quotes!
           <br />
-          <span data-bs-dismiss="offcanvas">
-            <Link to="/Motivational-Quotes-Generator/login">
-              <u>
-                <strong>Log in</strong>
-              </u>
-            </Link>
-          </span>{" "}
-          to keep your favorite list permanently!
+          {!isLoggedIn && (
+            <span data-bs-dismiss="offcanvas">
+              <Link to="/Motivational-Quotes-Generator/login">
+                <u>
+                  <strong>Log in</strong>
+                </u>
+              </Link>{" "}
+              to keep your favorite list permanently!
+            </span>
+          )}
           {quoteList}
         </div>
       </div>
