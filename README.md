@@ -10,9 +10,11 @@
 - [Authentication](#authentication)
 - [Contributing](#contributing)
 
-## Description
+## Description and Demo
 
 The Motivational Quotes Generator is a web application designed to inspire and motivate users with randomly generated quotes. Built with React and styled using Bootstrap, this app offers a sleek, modern interface for users to discover and save their favorite motivational quotes.
+
+You can try the online demo of the application here: https://suppleo.github.io/Motivational-Quotes-Generator/
 
 ## Features
 
