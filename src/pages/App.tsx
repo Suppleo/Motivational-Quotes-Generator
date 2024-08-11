@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Heading from "../components/Heading";
 import SubHeading from "../components/SubHeading";
 import GenerateButton from "../components/GenerateButton";
@@ -41,9 +41,12 @@ function App() {
   const [showGuestFavoritesModal, setShowGuestFavoritesModal] = useState(false);
   const [guestFavorites, setGuestFavorites] = useState<FavoriteQuote[]>([]);
   const [isAIGenerated, setIsAIGenerated] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
+    console.log("App component mounted");
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      console.log("Auth state changed. User:", user?.uid);
       if (user) {
         const userDoc = await getDoc(doc(db, "users", user.uid));
         if (userDoc.exists()) {
@@ -51,6 +54,7 @@ function App() {
           setSignedInUsername(userData.username);
           setSuccessAlertVisible(true);
           setIsLoggedIn(true);
+          console.log("User logged in:", userData.username);
           // Load favorite quotes
           if (userData.favoriteQuotes) {
             setFavoriteQuotes(userData.favoriteQuotes);
@@ -61,32 +65,56 @@ function App() {
               userData.favoriteQuotes.map((fq: FavoriteQuote) => fq.author)
             );
           }
-          checkAndSetGuestFavorites();
         }
       } else {
+        console.log("User logged out or not logged in");
         setSignedInUsername("");
         setIsLoggedIn(false);
-        // Clear favorite quotes when logged out
-        setFavoriteQuotes([]);
-        setQuoteList([]);
-        setAuthorList([]);
+        // Load guest favorites from localStorage
+        const storedGuestFavorites = localStorage.getItem("guestFavorites");
+        console.log("Stored guest favorites:", storedGuestFavorites);
+        if (storedGuestFavorites) {
+          const parsedGuestFavorites = JSON.parse(storedGuestFavorites);
+          setFavoriteQuotes(parsedGuestFavorites);
+          setQuoteList(
+            parsedGuestFavorites.map((fq: FavoriteQuote) => fq.quote)
+          );
+          setAuthorList(
+            parsedGuestFavorites.map((fq: FavoriteQuote) => fq.author)
+          );
+        } else {
+          // Clear favorite quotes when logged out and no guest favorites
+          setFavoriteQuotes([]);
+          setQuoteList([]);
+          setAuthorList([]);
+        }
+        setShowGuestFavoritesModal(false);
       }
     });
+    setIsInitialized(true);
     checkAndSetGuestFavorites();
 
     return () => unsubscribe();
   }, []);
 
-  const checkAndSetGuestFavorites = () => {
+  const checkAndSetGuestFavorites = useCallback(() => {
     const storedGuestFavorites = localStorage.getItem("guestFavorites");
-    if (storedGuestFavorites) {
+    console.log("Checking guest favorites. Stored:", storedGuestFavorites);
+    if (storedGuestFavorites && isLoggedIn) {
       const parsedGuestFavorites = JSON.parse(storedGuestFavorites);
       if (parsedGuestFavorites.length > 0) {
         setGuestFavorites(parsedGuestFavorites);
         setShowGuestFavoritesModal(true);
+        console.log("Guest favorites modal should show");
       }
     }
-  };
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (isInitialized && isLoggedIn) {
+      checkAndSetGuestFavorites();
+    }
+  }, [isInitialized, isLoggedIn, checkAndSetGuestFavorites]);
 
   // Update Firestore when favoriteQuotes change
   useEffect(() => {
@@ -358,7 +386,7 @@ function App() {
       />
 
       <GuestFavoritesModal
-        show={showGuestFavoritesModal}
+        show={showGuestFavoritesModal && isLoggedIn}
         onHide={handleCloseGuestFavoritesModal}
         guestFavorites={guestFavorites}
         onAddToPrivateList={handleAddGuestFavorites}
